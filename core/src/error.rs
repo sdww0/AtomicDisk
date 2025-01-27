@@ -31,10 +31,43 @@ pub enum Errno {
     NotBlockSizeAligned,
     /// Try lock failed.
     TryLockFailed,
+    /// Sgx error.
+    SgxError,
+    /// Bad File status.
+    BadStatus,
+    /// Recovery needed.
+    RecoveryNeeded,
+    /// Unexpected error.
+    Unexpected,
+}
+
+impl Errno {
+    pub fn to_str(&self) -> &'static str {
+        match self {
+            Errno::TxAborted => "Transaction aborted",
+            Errno::NotFound => "Not found",
+            Errno::InvalidArgs => "Invalid arguments",
+            Errno::OutOfMemory => "Out of memory",
+            Errno::OutOfDisk => "Out of disk space",
+            Errno::IoFailed => "IO error",
+            Errno::PermissionDenied => "Permission denied",
+            Errno::Unsupported => "Unsupported",
+            Errno::OsSpecUnknown => "OS-specific unknown error",
+            Errno::EncryptFailed => "Encryption operation failed",
+            Errno::DecryptFailed => "Decryption operation failed",
+            Errno::MacMismatched => "MAC (Message Authentication Code) mismatched",
+            Errno::NotBlockSizeAligned => "Not aligned to `BLOCK_SIZE`",
+            Errno::TryLockFailed => "Try lock failed",
+            Errno::SgxError => "Sgx error",
+            Errno::BadStatus => "Bad File status",
+            Errno::Unexpected => "Unexpected error",
+            Errno::RecoveryNeeded => "Recovery needed",
+        }
+    }
 }
 
 /// The error with an error type and an error message used in this crate.
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Error {
     errno: Errno,
     msg: Option<&'static str>,
@@ -65,6 +98,7 @@ impl From<Errno> for Error {
         Error::new(errno)
     }
 }
+
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

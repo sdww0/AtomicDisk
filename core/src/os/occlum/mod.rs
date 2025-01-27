@@ -24,6 +24,7 @@ pub use sgx_tstd::string::{String, ToString};
 pub use sgx_tstd::sync::{Arc, Weak};
 pub use sgx_tstd::thread::{spawn, JoinHandle};
 pub use sgx_tstd::vec::Vec;
+pub use sgx_tstd::sync::{SgxCondvar as Condvar, SgxMutex as CvarMutex};
 
 /// Unique ID for the OS thread.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -296,4 +297,25 @@ impl crate::util::Skcipher for Skcipher {
         rsgx_aes_ctr_decrypt(&key.0, input, &mut ctr.0, ctr_inc_bits, output)
             .map_err(|_| Error::with_msg(Errno::DecryptFailed, "skcipher decrypt failed"))
     }
+}
+
+
+#[derive(Copy, PartialEq, Eq, Clone, Debug)]
+pub enum SeekFrom {
+    /// Sets the offset to the provided number of bytes.
+    Start(u64),
+
+    /// Sets the offset to the size of this object plus the specified number of
+    /// bytes.
+    ///
+    /// It is possible to seek beyond the end of an object, but it's an error to
+    /// seek before byte 0.
+    End(i64),
+
+    /// Sets the offset to the current position plus the specified number of
+    /// bytes.
+    ///
+    /// It is possible to seek beyond the end of an object, but it's an error to
+    /// seek before byte 0.
+    Current(i64),
 }

@@ -1,5 +1,5 @@
 [package]
-name = "sworndisk-v2"
+name = "atomic-disk"
 version = "0.1.0"
 edition = "2021"
 
@@ -23,6 +23,7 @@ serde = { version = "=1.0.188", default-features = false, features = ["alloc", "
 spin = { version = "0.9.8", optional = true }
 static_assertions = "1.1.0"
 
+
 sgx_tstd = { git = "https://github.com/apache/teaclave-sgx-sdk.git", features = ["backtrace", "thread"], optional = true }
 sgx_rand = { git = "https://github.com/apache/teaclave-sgx-sdk.git", optional = true }
 sgx_tcrypto = { git = "https://github.com/apache/teaclave-sgx-sdk.git", optional = true }
@@ -40,8 +41,17 @@ jinux = []
 doctest = false
 
 [dev-dependencies]
+env_logger = { version = "0.11.4"}
 libc = "=0.2.147"
 
 [[bench]]
 name = "bench"
 harness = false
+
+
+[profile.release]
+opt-level = "z"
+overflow-checks = false
+lto = "thin"
+debug = 1
+debug-assertions = false
