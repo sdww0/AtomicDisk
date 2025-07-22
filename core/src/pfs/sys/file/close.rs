@@ -15,10 +15,15 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::prelude::{Result,Error};
-use crate::pfs::sys::file::{CloseMode, FileInner, FileStatus};
-use crate::pfs::sys::host;
-use crate::{bail, ensure, AeadKey, BlockSet, Errno};
+use crate::{
+    bail, ensure,
+    pfs::sys::{
+        file::{CloseMode, FileInner, FileStatus},
+        host,
+    },
+    prelude::{Error, Result},
+    AeadKey, BlockSet, Errno,
+};
 
 impl<D: BlockSet> FileInner<D> {
     pub fn close(&mut self, mode: CloseMode) -> Result<Option<AeadKey>> {
@@ -55,6 +60,8 @@ impl<D: BlockSet> FileInner<D> {
     }
 
     fn remove_recovery_file(&mut self) {
-        self.journal.reset().unwrap();
+        if self.journal_enabled {
+            self.journal.reset().unwrap();
+        }
     }
 }

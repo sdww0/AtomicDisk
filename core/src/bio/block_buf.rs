@@ -17,12 +17,12 @@
 //! and `&mut [u8]` with `BufMut<[u8]>`.
 //!
 
-use super::BLOCK_SIZE;
-use crate::os::Pages;
-use crate::prelude::*;
-
 use core::convert::TryFrom;
+
 use lending_iterator::prelude::*;
+
+use super::BLOCK_SIZE;
+use crate::{os::Pages, prelude::*};
 
 /// A owned buffer whose length is a multiple of the block size.
 pub struct Buf(Pages);
@@ -207,8 +207,9 @@ impl<'a> LendingIterator for BufIterMut<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Buf, BufMut, BufRef, BLOCK_SIZE};
     use lending_iterator::LendingIterator;
+
+    use super::{Buf, BufMut, BufRef, BLOCK_SIZE};
 
     fn iterate_buf_ref<'a>(buf: BufRef<'a>) {
         for block in buf.iter() {

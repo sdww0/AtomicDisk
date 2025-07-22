@@ -1,14 +1,14 @@
+use ostd::sync::MutexGuard;
+
 pub use self::open_options::OpenOptions;
-use crate::bio::bio_req::{BioReq, BioType};
-use crate::os::Mutex;
-use crate::os::SeekFrom;
-use crate::pfs::fs::SgxFile as PfsFile;
-use crate::{prelude::*, BlockSet, Buf, BufMut};
-use crate::{BufRef, Errno};
-use crate::os::{Aead, AeadIv as Iv, AeadKey as Key, AeadMac as Mac};
+use crate::{
+    bio::bio_req::{BioReq, BioType},
+    os::{Aead, AeadIv as Iv, AeadKey as Key, AeadMac as Mac, Mutex, SeekFrom},
+    pfs::fs::SgxFile as PfsFile,
+    prelude::*,
+    BlockSet, Buf, BufMut, BufRef, Errno,
+};
 mod open_options;
-
-
 
 struct BufMutVec<'a> {
     bufs: &'a mut [BufMut<'a>],
@@ -29,7 +29,6 @@ impl<'a> BufMutVec<'a> {
         self.nblocks
     }
 
-
     pub fn nth_buf_mut_slice(&mut self, mut nth: usize) -> &mut [u8] {
         debug_assert!(nth < self.nblocks);
         for buf in self.bufs.iter_mut() {
@@ -43,7 +42,6 @@ impl<'a> BufMutVec<'a> {
         &mut []
     }
 }
-
 
 /// A virtual disk backed by a protected file of Intel SGX Protected File
 /// System Library (SGX-PFS).
@@ -107,7 +105,7 @@ impl<D: BlockSet> PfsDisk<D> {
         Ok(())
     }
 
-    pub fn readv<'a>(&self,addr: usize, bufs: &'a mut [BufMut<'a>]) -> Result<()> {
+    pub fn readv<'a>(&self, addr: usize, bufs: &'a mut [BufMut<'a>]) -> Result<()> {
         let mut buf_vec = BufMutVec::from_bufs(bufs);
         let nblocks = buf_vec.nblocks();
         let mut buf = Buf::alloc(nblocks)?;
@@ -137,7 +135,6 @@ impl<D: BlockSet> PfsDisk<D> {
     }
 
     pub fn writev(&self, addr: usize, bufs: &[BufRef]) -> Result<()> {
-
         let n_block = bufs.len();
         let mut buf = Buf::alloc(n_block)?;
 
@@ -255,11 +252,11 @@ impl<D: BlockSet> fmt::Debug for PfsDisk<D> {
     }
 }
 
-
 #[cfg(feature = "occlum")]
 mod impl_block_device {
-    use super::{BlockSet, BufMut, BufRef, PfsDisk, Vec};
     use ext2_rs::{Bid, BlockDevice, FsError as Ext2Error};
+
+    use super::{BlockSet, BufMut, BufRef, PfsDisk, Vec};
 
     impl<D: BlockSet + 'static> BlockDevice for PfsDisk<D> {
         fn total_blocks(&self) -> usize {
@@ -324,10 +321,11 @@ mod impl_block_device {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::bio::{block_buf::Buf, block_set::MemDisk};
     use core::ptr::NonNull;
     use std::sync::Once;
+
+    use super::*;
+    use crate::bio::{block_buf::Buf, block_set::MemDisk};
     static INIT_LOG: Once = Once::new();
     pub fn init_logger() {
         INIT_LOG.call_once(|| {

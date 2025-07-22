@@ -1,5 +1,6 @@
-use crate::prelude::Result;
 use core::ops::Deref;
+
+use crate::prelude::Result;
 
 /// Random initialization for Key, Iv and Mac.
 pub trait RandomInit: Default {

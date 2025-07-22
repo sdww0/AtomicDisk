@@ -13,6 +13,7 @@ use core::{
     ops::{Deref, DerefMut},
     ptr::{addr_of_mut, NonNull},
 };
+
 use kernel::{prelude::*, types::Opaque};
 
 mod std_vendor;

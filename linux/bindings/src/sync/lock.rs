@@ -12,7 +12,12 @@ use core::{
     fmt,
     marker::{PhantomData, PhantomPinned},
 };
-use kernel::{prelude::*, str::CStr, types::Opaque, types::ScopeGuard};
+
+use kernel::{
+    prelude::*,
+    str::CStr,
+    types::{Opaque, ScopeGuard},
+};
 
 use super::LockClassKey;
 

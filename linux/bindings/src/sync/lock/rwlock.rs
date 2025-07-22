@@ -6,6 +6,7 @@
 //! This module allows Rust code to use the kernel's `struct rw_semaphore`.
 
 use core::{marker::PhantomData, mem::transmute};
+
 use kernel::prelude::*;
 
 use super::{Backend, Guard, Lock};

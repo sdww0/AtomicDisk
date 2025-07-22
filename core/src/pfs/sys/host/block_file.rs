@@ -1,10 +1,8 @@
 use super::HostFs;
 use crate::{
-    bail, ensure,
-    pfs::sys::node::NODE_SIZE,
-    BlockId, BlockSet, BufMut, BufRef, Errno, Error,
+    bail, ensure, pfs::sys::node::NODE_SIZE, prelude::*, BlockId, BlockSet, BufMut, BufRef, Errno,
+    Error,
 };
-use crate::prelude::*;
 
 #[derive(Debug)]
 pub struct BlockFile<D> {
@@ -28,8 +26,7 @@ impl<D: BlockSet> BlockFile<D> {
             )
         );
         let buf_mut = BufMut::try_from(buf)?;
-        self.raw_disk
-            .read(number as BlockId, buf_mut)?;
+        self.raw_disk.read(number as BlockId, buf_mut)?;
         Ok(())
     }
 
@@ -45,8 +42,7 @@ impl<D: BlockSet> BlockFile<D> {
         self.size = block_end.max(self.size);
 
         let buf_ref = BufRef::try_from(buf)?;
-        self.raw_disk
-            .write(number as BlockId, buf_ref)?;
+        self.raw_disk.write(number as BlockId, buf_ref)?;
         Ok(())
     }
 

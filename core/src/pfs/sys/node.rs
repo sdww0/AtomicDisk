@@ -17,22 +17,23 @@
 
 #![allow(clippy::arc_with_non_send_sync)]
 
+use core::{cell::RefCell, cmp::Ordering, mem};
+
 use pod::Pod;
-use crate::pfs::sys::cache::NodeRef;
-use crate::{prelude::*, AeadIv, Errno};
-use crate::pfs::sys::keys::{DeriveKey, KeyType};
-use crate::pfs::sys::metadata::EncryptFlags;
-use crate::util::Aead as _;
-use crate::{
-    impl_asmut_slice, impl_asref_slice, impl_struct_ContiguousMemory, impl_struct_default, Aead,
-    AeadKey, AeadMac,
-};
-use core::cell::RefCell;
-use core::cmp::Ordering;
-use core::mem;
-use crate::os::Arc;
 
 use super::host::HostFs;
+use crate::{
+    impl_asmut_slice, impl_asref_slice, impl_struct_ContiguousMemory, impl_struct_default,
+    os::Arc,
+    pfs::sys::{
+        cache::NodeRef,
+        keys::{DeriveKey, KeyType},
+        metadata::EncryptFlags,
+    },
+    prelude::*,
+    util::Aead as _,
+    Aead, AeadIv, AeadKey, AeadMac, Errno,
+};
 
 // the key to encrypt the data or mht, and the gmac
 #[derive(Copy, Clone, Debug, Default)]
@@ -257,14 +258,13 @@ impl FileNode {
         // TODO: support integrity only
 
         let iv = AeadIv::new_zeroed();
-        let mac = Aead::new()
-            .encrypt(
-                self.plaintext.as_ref(),
-                key,
-                &iv,
-                &[],
-                &mut self.ciphertext.node_data.as_mut(),
-            )?;
+        let mac = Aead::new().encrypt(
+            self.plaintext.as_ref(),
+            key,
+            &iv,
+            &[],
+            &mut self.ciphertext.node_data.as_mut(),
+        )?;
 
         if let Some(parent) = parent {
             let index = match self.node_type {
@@ -283,15 +283,14 @@ impl FileNode {
 
     pub fn decrypt(&mut self, key: &AeadKey, mac: &AeadMac) -> Result<()> {
         // TODO: support integrity only
-        Aead::new()
-            .decrypt(
-                self.ciphertext.node_data.as_ref(),
-                key,
-                &AeadIv::new_zeroed(),
-                &[],
-                mac,
-                self.plaintext.as_mut(),
-            )?;
+        Aead::new().decrypt(
+            self.ciphertext.node_data.as_ref(),
+            key,
+            &AeadIv::new_zeroed(),
+            &[],
+            mac,
+            self.plaintext.as_mut(),
+        )?;
 
         Ok(())
     }

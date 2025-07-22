@@ -11,6 +11,7 @@ use core::{
     sync::atomic::{AtomicBool, Ordering},
     time::Duration,
 };
+
 use kernel::{
     new_condvar, new_mutex,
     prelude::*,

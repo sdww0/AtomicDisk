@@ -22,12 +22,15 @@ mod node;
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::prelude::*;
-use super::sgx::KeyPolicy;
-use crate::os::{Box, SeekFrom};
-use crate::pfs::sys::file::{self as file_imp, ProtectedFile};
-use crate::{AeadKey, AeadMac, BlockSet, Error};
 use core::mem::ManuallyDrop;
+
+use super::sgx::KeyPolicy;
+use crate::{
+    os::{Box, SeekFrom},
+    pfs::sys::file::{self as file_imp, ProtectedFile},
+    prelude::*,
+    AeadKey, AeadMac, BlockSet, Error,
+};
 
 #[derive(Clone, Debug)]
 pub struct OpenOptions(file_imp::OpenOptions);

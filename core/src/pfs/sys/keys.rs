@@ -15,11 +15,19 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::pfs::sgx::{ContiguousMemory, CpuSvn, KeyId, KeyPolicy};
-use crate::pfs::sys::file::OpenMode;
-use crate::util::Rng as _;
-use crate::{bail, cfg_if, ensure, impl_struct_default, AeadKey, Errno, Rng};
-use crate::prelude::*;
+use aes::Aes128;
+use cmac::{Cmac, Mac};
+
+use crate::{
+    bail, cfg_if, ensure, impl_struct_default,
+    pfs::{
+        sgx::{ContiguousMemory, CpuSvn, KeyId, KeyPolicy},
+        sys::file::OpenMode,
+    },
+    prelude::*,
+    util::Rng as _,
+    AeadKey, Errno, Rng,
+};
 
 pub trait DeriveKey {
     fn derive_key(&mut self, key_type: KeyType, node_number: u64) -> Result<(AeadKey, KeyId)>;
@@ -124,7 +132,10 @@ impl MetadataKey {
 
 impl DeriveKey for MetadataKey {
     fn derive_key(&mut self, key_type: KeyType, _node_number: u64) -> Result<(AeadKey, KeyId)> {
-        ensure!(key_type == KeyType::Metadata, Error::new(Errno::InvalidArgs));
+        ensure!(
+            key_type == KeyType::Metadata,
+            Error::new(Errno::InvalidArgs)
+        );
         match self {
             Self::UserKey(ref user_key) => KdfInput::derive_key(user_key, KeyType::Metadata, 0),
         }
@@ -141,9 +152,14 @@ impl RestoreKey for MetadataKey {
         cpu_svn: Option<CpuSvn>,
         isv_svn: Option<u16>,
     ) -> Result<AeadKey> {
-        ensure!(key_type == KeyType::Metadata, Error::new(Errno::InvalidArgs));
+        ensure!(
+            key_type == KeyType::Metadata,
+            Error::new(Errno::InvalidArgs)
+        );
         match self {
-            Self::UserKey(ref user_key) => KdfInput::restore_key(user_key, KeyType::Metadata, 0, key_id),
+            Self::UserKey(ref user_key) => {
+                KdfInput::restore_key(user_key, KeyType::Metadata, 0, key_id)
+            }
         }
     }
 }
@@ -279,7 +295,10 @@ impl DeriveKey for FsKeyGen {
             },
             Self::IntegrityOnly => Ok((AeadKey::default(), KeyId::default())),
             Self::Import(metadata_key) => {
-                ensure!(key_type == KeyType::Metadata, Error::new(Errno::InvalidArgs));
+                ensure!(
+                    key_type == KeyType::Metadata,
+                    Error::new(Errno::InvalidArgs)
+                );
                 metadata_key.derive_key(KeyType::Metadata, 0)
             }
             Self::Export(_) => return_errno!(Errno::InvalidArgs),

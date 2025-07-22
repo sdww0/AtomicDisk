@@ -1,12 +1,17 @@
 //! Block I/O (BIO).
-use crate::os::{Mutex, MutexGuard};
-use crate::prelude::*;
+use core::{
+    any::Any,
+    ptr::NonNull,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 
 use anymap::hashbrown::AnyMap;
-use core::any::Any;
-use core::ptr::NonNull;
-use core::sync::atomic::{AtomicUsize, Ordering};
 use crossbeam_queue::SegQueue;
+
+use crate::{
+    os::{Mutex, MutexGuard},
+    prelude::*,
+};
 
 /// A queue for managing block I/O requests (`BioReq`).
 /// It provides a concurrency-safe way to store and manage

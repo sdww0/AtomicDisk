@@ -15,10 +15,11 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::os::{Arc, HashMap};
-use core::cell::RefCell;
-use core::ptr::NonNull;
+use core::{cell::RefCell, ptr::NonNull};
+
 use list::{LinkedList, Node};
+
+use crate::os::{Arc, HashMap};
 
 mod list;
 
@@ -160,9 +161,6 @@ impl<T> LruCache<T> {
             map: &self.map,
         }
     }
-
-
-
 }
 
 impl<'a, T> Iterator for Iter<'a, T> {

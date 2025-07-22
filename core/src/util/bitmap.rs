@@ -1,5 +1,6 @@
-use bittle::{Bits, BitsMut};
 use core::ops::Index;
+
+use bittle::{Bits, BitsMut};
 use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;

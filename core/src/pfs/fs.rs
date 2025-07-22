@@ -16,13 +16,12 @@
 // under the License..
 
 use super::sgx::KeyPolicy;
-use crate::os::SeekFrom;
-use crate::os::String;
-use crate::os::Vec;
-use crate::pfs::sys as fs_imp;
-use crate::prelude::*;
-use crate::{AeadKey, AeadMac, BlockSet};
-
+use crate::{
+    os::{SeekFrom, String, Vec},
+    pfs::sys as fs_imp,
+    prelude::*,
+    AeadKey, AeadMac, BlockSet,
+};
 
 /// Options and flags which can be used to configure how a file is opened.
 ///
@@ -50,7 +49,6 @@ pub struct SgxFile<D> {
 
 unsafe impl<D: BlockSet> Send for SgxFile<D> {}
 unsafe impl<D: BlockSet> Sync for SgxFile<D> {}
-
 
 impl<D: BlockSet> SgxFile<D> {
     //#[cfg(feature = "tfs")]

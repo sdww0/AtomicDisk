@@ -15,13 +15,20 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::prelude::{Result, Error};
-use crate::error::Errno;
-use crate::pfs::sys::file::{FileInner, FileStatus};
-use crate::pfs::sys::metadata::MD_USER_DATA_SIZE;
-use crate::pfs::sys::node::{FileNode, FileNodeRef, NodeType};
-use crate::pfs::sys::node::{ATTACHED_DATA_NODES_COUNT, CHILD_MHT_NODES_COUNT, NODE_SIZE};
-use crate::{bail, ensure, BlockSet};
+use crate::{
+    bail, ensure,
+    error::Errno,
+    pfs::sys::{
+        file::{FileInner, FileStatus},
+        metadata::MD_USER_DATA_SIZE,
+        node::{
+            FileNode, FileNodeRef, NodeType, ATTACHED_DATA_NODES_COUNT, CHILD_MHT_NODES_COUNT,
+            NODE_SIZE,
+        },
+    },
+    prelude::{Error, Result},
+    BlockSet,
+};
 
 impl<D: BlockSet> FileInner<D> {
     pub fn get_data_node(&mut self) -> Result<FileNodeRef> {
@@ -121,7 +128,9 @@ impl<D: BlockSet> FileInner<D> {
 
         mht_node.read_from_disk(&mut self.host_file)?;
 
-        let gcm_data = mht_node.get_gcm_data().ok_or(Error::new(Errno::Unexpected))?;
+        let gcm_data = mht_node
+            .get_gcm_data()
+            .ok_or(Error::new(Errno::Unexpected))?;
         mht_node.decrypt(&gcm_data.key, &gcm_data.mac)?;
 
         let mht_node = FileNode::build_ref(mht_node);
@@ -169,7 +178,9 @@ impl<D: BlockSet> FileInner<D> {
 
         data_node.read_from_disk(&mut self.host_file)?;
 
-        let gcm_data = data_node.get_gcm_data().ok_or(Error::new(Errno::Unexpected))?;
+        let gcm_data = data_node
+            .get_gcm_data()
+            .ok_or(Error::new(Errno::Unexpected))?;
         data_node.decrypt(&gcm_data.key, &gcm_data.mac)?;
 
         let data_node = FileNode::build_ref(data_node);
@@ -278,9 +289,8 @@ impl<D: BlockSet> FileInner<D> {
 
 #[cfg(test)]
 mod tests {
-    use crate::bio::MemDisk;
-
     use super::*;
+    use crate::bio::MemDisk;
 
     #[test]
     fn test_is_data_node() {

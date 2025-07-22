@@ -14,27 +14,27 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License..
-use crate::bail;
-use crate::ensure;
-use crate::bio::MemDisk;
-use crate::os::HashMap;
-use crate::os::SeekFrom;
-use crate::os::{Arc, Mutex};
-use crate::pfs::sgx::KeyPolicy;
-use crate::pfs::sys::cache::LruCache;
-use crate::prelude::{Result,Error};
-use crate::pfs::sys::keys::FsKeyGen;
-use crate::pfs::sys::metadata::MetadataInfo;
-use crate::pfs::sys::node::{FileNode, FileNodeRef};
-use crate::pfs::sys::EncryptMode;
-use crate::AeadKey;
-use crate::AeadMac;
-use crate::BlockSet;
-use crate::Errno;
 use core::cell::RefCell;
 
-use super::host::block_file::BlockFile;
-use super::host::journal::RecoveryJournal;
+use super::host::{block_file::BlockFile, journal::RecoveryJournal};
+use crate::{
+    bail,
+    bio::MemDisk,
+    ensure,
+    os::{Arc, HashMap, Mutex, SeekFrom},
+    pfs::{
+        sgx::KeyPolicy,
+        sys::{
+            cache::LruCache,
+            keys::FsKeyGen,
+            metadata::MetadataInfo,
+            node::{FileNode, FileNodeRef},
+            EncryptMode,
+        },
+    },
+    prelude::{Error, Result},
+    AeadKey, AeadMac, BlockSet, Errno,
+};
 
 mod close;
 mod flush;
@@ -63,6 +63,7 @@ pub struct FileInner<D> {
     last_error: Option<Error>,
     status: FileStatus,
     journal: RecoveryJournal<D>,
+    journal_enabled: bool,
     cache: LruCache<FileNode>,
 }
 
@@ -199,7 +200,6 @@ impl<D: BlockSet> ProtectedFile<D> {
 
     pub fn clear_cache(&self) -> Result<()> {
         let mut file = self.file.lock();
-
         file.clear_cache().map_err(|error| {
             file.set_last_error(error);
             error
@@ -241,11 +241,13 @@ impl<D: BlockSet> ProtectedFile<D> {
     }
 
     #[cfg(test)]
-    pub fn rollback_nodes(&self, rollback_nodes: HashMap<u64, Arc<RefCell<FileNode>>>) -> Result<()> {
+    pub fn rollback_nodes(
+        &self,
+        rollback_nodes: HashMap<u64, Arc<RefCell<FileNode>>>,
+    ) -> Result<()> {
         let mut file = self.file.lock();
         file.rollback_nodes(rollback_nodes)
     }
-
 }
 
 #[allow(dead_code)]
@@ -448,7 +450,6 @@ pub enum CloseMode {
     Export,
 }
 
-
 #[cfg(test)]
 mod test {
     use std::{path::Path, sync::Once};
@@ -456,9 +457,8 @@ mod test {
     use log::info;
     use open::SE_PAGE_SIZE;
 
-    use crate::pfs::sys::{metadata::EncryptFlags, node::NodeType};
-
     use super::*;
+    use crate::pfs::sys::{metadata::EncryptFlags, node::NodeType};
 
     static INIT_LOG: Once = Once::new();
 

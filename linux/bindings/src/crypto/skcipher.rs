@@ -34,6 +34,7 @@
 //! C header: [`include/crypto/skcipher.h`](include/crypto/skcipher.h)
 
 use core::ptr::{addr_of_mut, NonNull};
+
 use kernel::{
     bindings::{GFP_KERNEL, IS_ERR, PTR_ERR},
     error::to_result,

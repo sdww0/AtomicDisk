@@ -15,14 +15,18 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::os::Vec;
-use crate::prelude::{Result,Error};
-use crate::pfs::sys::file::{FileInner, FileStatus};
-use crate::pfs::sys::host::{self, HostFs};
-use crate::pfs::sys::metadata::MD_USER_DATA_SIZE;
-use crate::pfs::sys::node::FileNodeRef;
-use crate::{bail, ensure, BlockSet, Errno};
-use crate::prelude::*;
+use crate::{
+    bail, ensure,
+    os::Vec,
+    pfs::sys::{
+        file::{FileInner, FileStatus},
+        host::{self, HostFs},
+        metadata::MD_USER_DATA_SIZE,
+        node::FileNodeRef,
+    },
+    prelude::{Error, Result, *},
+    BlockSet, Errno,
+};
 
 impl<D: BlockSet> FileInner<D> {
     pub fn flush(&mut self) -> Result<()> {

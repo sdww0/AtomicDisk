@@ -5,12 +5,6 @@ use alloc::{
     boxed::Box as KBox,
     vec::Vec as KVec,
 };
-use bindings::{
-    new_rwlock,
-    sync::lock::rwlock::{Read, RwLockBackend, Write},
-    sync::Arc as KArc,
-    sync::Weak as KWeak,
-};
 use core::{
     any::Any,
     borrow::Borrow,
@@ -25,6 +19,18 @@ use core::{
     result, slice,
     slice::sort::{merge_sort, TimSortRun},
 };
+
+/// Reuse `spawn` and `JoinHandle` in `bindings::thread`.
+pub use bindings::thread::{spawn, JoinHandle};
+use bindings::{
+    new_rwlock,
+    sync::{
+        lock::rwlock::{Read, RwLockBackend, Write},
+        Arc as KArc, Weak as KWeak,
+    },
+};
+/// Reuse `BTreeMap` in `btree` crate.
+pub use btree::BTreeMap;
 use kernel::{
     c_str, current,
     init::{InPlaceInit, Init, PinInit},
@@ -38,12 +44,6 @@ use crate::{
     error::Errno,
     prelude::{Error, Result},
 };
-
-/// Reuse `BTreeMap` in `btree` crate.
-pub use btree::BTreeMap;
-
-/// Reuse `spawn` and `JoinHandle` in `bindings::thread`.
-pub use bindings::thread::{spawn, JoinHandle};
 
 /// Wrap `alloc::boxed::Box` provided by kernel.
 #[repr(transparent)]

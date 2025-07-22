@@ -1,11 +1,10 @@
 use super::{PfsDisk, PFS_INNER_OFFSET};
-use crate::os::Mutex;
-use crate::os::SeekFrom;
-use crate::pfs::fs::OpenOptions as PfsOpenOptions;
-use crate::pfs::fs::SgxFile as PfsFile;
-use crate::AeadKey;
-use crate::BlockSet;
-use crate::{prelude::*, Errno};
+use crate::{
+    os::{Mutex, SeekFrom},
+    pfs::fs::{OpenOptions as PfsOpenOptions, SgxFile as PfsFile},
+    prelude::*,
+    AeadKey, BlockSet, Errno,
+};
 /// Options that are used to configure how a PFS disk is opened.
 pub struct OpenOptions {
     read: bool,
@@ -171,10 +170,11 @@ impl OpenOptions {
 
 /// Open an existing PFS file with read and write permissions.
 fn open_pfs_file<D: BlockSet>(path: &str, disk: D) -> Result<PfsFile<D>> {
-    let ret = PfsOpenOptions::new()
-        .read(true)
-        .update(true)
-        .open_with_key(disk, path, AeadKey::default());
+    let ret =
+        PfsOpenOptions::new()
+            .read(true)
+            .update(true)
+            .open_with_key(disk, path, AeadKey::default());
     ret
 }
 

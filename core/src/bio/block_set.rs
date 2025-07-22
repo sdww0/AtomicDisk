@@ -1,10 +1,13 @@
-use crate::bio::block_buf::{Buf, BufMut, BufRef};
-use crate::error::Errno;
-use crate::os::Mutex;
-use crate::prelude::*;
-
 use core::ops::Range;
+
 use inherit_methods_macro::inherit_methods;
+
+use crate::{
+    bio::block_buf::{Buf, BufMut, BufRef},
+    error::Errno,
+    os::Mutex,
+    prelude::*,
+};
 
 /// A fixed set of data blocks that can support random reads and writes.
 ///
@@ -161,9 +164,7 @@ impl BlockSet for MemDisk {
 
     fn write(&self, pos: BlockId, buf: BufRef) -> Result<()> {
         if pos + buf.nblocks() > self.region.end {
-            return_errno_with_msg!(
-                Errno::InvalidArgs,"write position is out of range"
-        );
+            return_errno_with_msg!(Errno::InvalidArgs, "write position is out of range");
         }
         let offset = (self.region.start + pos) * BLOCK_SIZE;
         let buf_len = buf.as_slice().len();
@@ -198,8 +199,12 @@ impl BlockSet for MemDisk {
 
 #[cfg(test)]
 mod tests {
-    use crate::bio::{block_buf::Buf, block_set::{BlockSet, MemDisk}};
     use core::ops::Range;
+
+    use crate::bio::{
+        block_buf::Buf,
+        block_set::{BlockSet, MemDisk},
+    };
 
     #[test]
     fn mem_disk() {

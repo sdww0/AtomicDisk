@@ -1,9 +1,12 @@
-use crate::bio::block_buf::{Buf, BufMut, BufRef};
-use crate::os::Mutex;
-use crate::prelude::*;
-
 use core::sync::atomic::{AtomicUsize, Ordering};
+
 use inherit_methods_macro::inherit_methods;
+
+use crate::{
+    bio::block_buf::{Buf, BufMut, BufRef},
+    os::Mutex,
+    prelude::*,
+};
 
 /// A log of data blocks that can support random reads and append-only
 /// writes.

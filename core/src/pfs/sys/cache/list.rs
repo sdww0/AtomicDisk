@@ -14,12 +14,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License..
-use core::cmp::Ordering;
-use core::fmt;
-use core::hash::{Hash, Hasher};
-use core::marker::PhantomData;
-use core::mem;
-use core::ptr::NonNull;
+use core::{
+    cmp::Ordering,
+    fmt,
+    hash::{Hash, Hasher},
+    marker::PhantomData,
+    mem,
+    ptr::NonNull,
+};
+
 use crate::prelude::*;
 /// A doubly-linked list with owned nodes.
 pub struct LinkedList {
@@ -409,7 +412,7 @@ impl LinkedList {
 
     /// Removes the first element and returns it, or `None` if the list is
     /// empty.
-        pub fn pop_front(&mut self) -> Option<u64> {
+    pub fn pop_front(&mut self) -> Option<u64> {
         self.pop_front_node().map(Node::into_element)
     }
 

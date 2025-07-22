@@ -15,24 +15,30 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::bio::MemDisk;
-use crate::os::Arc;
-use crate::os::HashMap;
-use crate::pfs::sys::cache::LruCache;
-use crate::pfs::sys::file::{FileInner, FileStatus, OpenMode, OpenOptions};
-use crate::pfs::sys::host::block_file::BlockFile;
-use crate::pfs::sys::host::journal::RecoveryJournal;
-use crate::pfs::sys::host::{self, HostFs, RecoveryHandler, RECOVERY_NODE_SIZE};
-use crate::pfs::sys::keys::{FsKeyGen, RestoreKey};
-use crate::pfs::sys::metadata::MetadataInfo;
-use crate::pfs::sys::metadata::{
-    FILENAME_MAX_LEN, FULLNAME_MAX_LEN, MD_USER_DATA_SIZE, SGX_FILE_ID, SGX_FILE_MAJOR_VERSION,
-};
-use crate::pfs::sys::node::{FileNode, FileNodeRef, NodeType, NODE_SIZE};
-use crate::Errno;
-use crate::{bail, ensure, AeadKey, BlockSet};
 use core::cell::RefCell;
-use crate::prelude::*;
+
+use crate::{
+    bail,
+    bio::MemDisk,
+    ensure,
+    os::{Arc, HashMap},
+    pfs::sys::{
+        cache::LruCache,
+        file::{FileInner, FileStatus, OpenMode, OpenOptions},
+        host::{
+            self, block_file::BlockFile, journal::RecoveryJournal, HostFs, RecoveryHandler,
+            RECOVERY_NODE_SIZE,
+        },
+        keys::{FsKeyGen, RestoreKey},
+        metadata::{
+            MetadataInfo, FILENAME_MAX_LEN, FULLNAME_MAX_LEN, MD_USER_DATA_SIZE, SGX_FILE_ID,
+            SGX_FILE_MAJOR_VERSION,
+        },
+        node::{FileNode, FileNodeRef, NodeType, NODE_SIZE},
+    },
+    prelude::*,
+    AeadKey, BlockSet, Errno,
+};
 
 pub const SE_PAGE_SIZE: usize = 0x1000;
 macro_rules! is_page_aligned {
@@ -183,11 +189,17 @@ impl<D: BlockSet> FileInner<D> {
         );
 
         let encrypt_flags = mode.into();
-        ensure!(encrypt_flags == metadata.encrypt_flags(), Error::with_msg(Errno::InvalidArgs, "encrypt_flags mismatch"));
+        ensure!(
+            encrypt_flags == metadata.encrypt_flags(),
+            Error::with_msg(Errno::InvalidArgs, "encrypt_flags mismatch")
+        );
 
         let key_policy = mode.key_policy();
         if mode.is_auto_key() {
-            ensure!(key_policy.unwrap() == metadata.key_policy(), Error::with_msg(Errno::InvalidArgs, "key_policy mismatch"));
+            ensure!(
+                key_policy.unwrap() == metadata.key_policy(),
+                Error::with_msg(Errno::InvalidArgs, "key_policy mismatch")
+            );
         }
 
         let key = match mode.import_key() {
@@ -258,14 +270,12 @@ impl<D: BlockSet> FileInner<D> {
         host_file: &mut BlockFile<D>,
         journal: &mut RecoveryJournal<D>,
     ) -> Result<HashMap<u64, Arc<RefCell<FileNode>>>> {
-
         // TODO check recovery file size
 
         let roll_back_nodes = host::journal::recovery(host_file, journal)?;
 
         Ok(roll_back_nodes)
     }
-
 
     #[inline]
     fn check_open_param(path: &str, name: &str, opts: &OpenOptions, mode: &OpenMode) -> Result<()> {
@@ -276,8 +286,14 @@ impl<D: BlockSet> FileInner<D> {
         );
 
         let name_len = name.len();
-        ensure!(name_len > 0, Error::with_msg(Errno::InvalidArgs, "name length invalid"));
-        ensure!(name_len < FILENAME_MAX_LEN - 1, Error::with_msg(Errno::InvalidArgs, "name length invalid"));
+        ensure!(
+            name_len > 0,
+            Error::with_msg(Errno::InvalidArgs, "name length invalid")
+        );
+        ensure!(
+            name_len < FILENAME_MAX_LEN - 1,
+            Error::with_msg(Errno::InvalidArgs, "name length invalid")
+        );
 
         opts.check()?;
         mode.check()?;

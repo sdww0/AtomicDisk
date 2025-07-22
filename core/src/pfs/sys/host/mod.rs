@@ -1,16 +1,20 @@
-use super::metadata::{EncryptFlags, MetadataInfo, MD_USER_DATA_SIZE};
-use super::node::{
-    EncryptedData, FileNode, NodeType, ATTACHED_DATA_NODES_COUNT, CHILD_MHT_NODES_COUNT, NODE_SIZE,
-};
-use crate::prelude::*;
-use crate::os::Arc;
-use crate::os::HashMap;
-use crate::{bail, ensure, AeadKey};
 use core::cell::RefCell;
+
+use super::{
+    metadata::{EncryptFlags, MetadataInfo, MD_USER_DATA_SIZE},
+    node::{
+        EncryptedData, FileNode, NodeType, ATTACHED_DATA_NODES_COUNT, CHILD_MHT_NODES_COUNT,
+        NODE_SIZE,
+    },
+};
+use crate::{
+    bail, ensure,
+    os::{Arc, HashMap},
+    prelude::*,
+    AeadKey,
+};
 pub mod block_file;
 pub mod journal;
-
-
 
 const MILISECONDS_SLEEP_FOPEN: u32 = 10;
 const MAX_FOPEN_RETRIES: usize = 10;
@@ -248,6 +252,7 @@ mod tests {
 
     use hashbrown::HashMap;
 
+    use super::RecoveryHandler;
     use crate::{
         pfs::sys::{
             file::OpenMode,
@@ -256,8 +261,6 @@ mod tests {
         },
         AeadKey,
     };
-
-    use super::RecoveryHandler;
 
     fn new_file(file_name: &str, mode: &OpenMode) -> MetadataInfo {
         let mut metadata = MetadataInfo::new();

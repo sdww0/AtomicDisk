@@ -1,16 +1,16 @@
+use core::{cell::RefCell, ffi::CStr};
+
 use super::{block_file::BlockFile, HostFs, JournalFlag};
-use crate::os::Arc;
-use crate::os::HashMap;
 use crate::{
     bail, ensure,
+    os::{Arc, HashMap},
     pfs::sys::{
         host::{RecoveryHandler, RECOVERY_NODE_SIZE},
         node::{EncryptedData, FileNode, NodeType, NODE_SIZE},
     },
+    prelude::*,
     BlockSet, Buf, Errno, Error, BLOCK_SIZE,
 };
-use core::{cell::RefCell, ffi::CStr};
-use crate::prelude::*;
 
 // 4MB
 const DEFAULT_BUF_SIZE: usize = 4 * 1024 * 1024;
@@ -66,10 +66,7 @@ impl<D: BlockSet> RawJournal<D> {
         let size = usize::from_le_bytes(buf.as_slice()[0..8].try_into().unwrap());
         ensure!(
             size >= INNER_OFFSET,
-            Error::with_msg(
-                Errno::InvalidArgs,
-                "journal size is less than inner offset"
-            )
+            Error::with_msg(Errno::InvalidArgs, "journal size is less than inner offset")
         );
         Ok(size - INNER_OFFSET)
     }
@@ -107,7 +104,7 @@ impl<D: BlockSet> RecoveryJournal<D> {
             Error::with_msg(
                 Errno::InvalidArgs,
                 "recovery node size is not equal to recovery node size",
-            )   
+            )
         );
         let flag = JournalFlag::Node;
         self.raw.append(&[flag as u8])?;
@@ -235,6 +232,7 @@ pub fn recovery<D: BlockSet>(
 }
 
 mod tests {
+    use super::{RecoveryJournal, DEFAULT_BUF_SIZE, INNER_OFFSET};
     use crate::{
         bio::MemDisk,
         pfs::sys::{
@@ -247,8 +245,6 @@ mod tests {
         },
         BlockSet, BLOCK_SIZE,
     };
-
-    use super::{RecoveryJournal, DEFAULT_BUF_SIZE, INNER_OFFSET};
 
     #[test]
     fn read_write_in_buf() {

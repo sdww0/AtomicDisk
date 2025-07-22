@@ -15,14 +15,20 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::prelude::Result;
-use crate::os::SeekFrom;
-use crate::pfs::sys::file::{FileInner, FileStatus};
-use crate::pfs::sys::host;
-use crate::pfs::sys::metadata::FILENAME_MAX_LEN;
-use crate::{bail, ensure, AeadMac, BlockSet, Errno};
+use log::error;
 
 use super::Error;
+use crate::{
+    bail, ensure,
+    os::SeekFrom,
+    pfs::sys::{
+        file::{FileInner, FileStatus},
+        host,
+        metadata::FILENAME_MAX_LEN,
+    },
+    prelude::Result,
+    AeadMac, BlockSet, Errno, BLOCK_SIZE,
+};
 
 impl<D: BlockSet> FileInner<D> {
     #[inline]
@@ -188,11 +194,17 @@ impl<D: BlockSet> FileInner<D> {
     pub fn rename(&mut self, old_name: &str, new_name: &str) -> Result<()> {
         let old_len = old_name.len();
         ensure!(old_len > 0, Error::new(Errno::InvalidArgs));
-        ensure!(old_len < FILENAME_MAX_LEN - 1, Error::with_msg(Errno::InvalidArgs, "file name too long"));
+        ensure!(
+            old_len < FILENAME_MAX_LEN - 1,
+            Error::with_msg(Errno::InvalidArgs, "file name too long")
+        );
 
         let new_len = new_name.len();
         ensure!(new_len > 0, Error::new(Errno::InvalidArgs));
-        ensure!(new_len < FILENAME_MAX_LEN - 1, Error::with_msg(Errno::InvalidArgs, "file name too long"));
+        ensure!(
+            new_len < FILENAME_MAX_LEN - 1,
+            Error::with_msg(Errno::InvalidArgs, "file name too long")
+        );
 
         let meta_file_name = self.metadata.file_name()?;
         ensure!(
@@ -222,7 +234,6 @@ impl<D: BlockSet> FileInner<D> {
     pub fn set_last_error(&mut self, error: Error) {
         self.last_error = Some(error);
     }
-
 
     #[inline]
     pub fn set_file_status(&mut self, status: FileStatus) {

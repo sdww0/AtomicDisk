@@ -4,17 +4,23 @@
 //! Write/read amount, concurrency and I/O buffer size are configurable.
 //! Provides a baseline named `EncDisk`, which simply protects data using authenticated encryption.
 //! Results are displayed as throughput in MiB/sec.
+use std::{
+    sync::{
+        atomic::{AtomicU32, Ordering},
+        Arc, Once,
+    },
+    time::Instant,
+};
+
 use atomic_disk::*;
-
-use self::benches::{Bench, BenchBuilder, IoPattern, IoType};
-use self::consts::*;
-use self::disks::{DiskType, FileAsDisk};
-use self::util::{DisplayData, DisplayThroughput};
-
 use libc::{fdatasync, ftruncate, open, pread, pwrite, unlink, O_CREAT, O_DIRECT, O_RDWR, O_TRUNC};
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::{Arc, Once};
-use std::time::Instant;
+
+use self::{
+    benches::{Bench, BenchBuilder, IoPattern, IoType},
+    consts::*,
+    disks::{DiskType, FileAsDisk},
+    util::{DisplayData, DisplayThroughput},
+};
 
 static INIT_LOG: Once = Once::new();
 
@@ -29,13 +35,11 @@ fn init_logger() {
 }
 
 fn main() {
-   init_logger();
+    init_logger();
     let total_bytes = 5 * GiB;
     // Specify all benchmarks
     let benches = vec![
-
- 
-            BenchBuilder::new("PfsDisk::write_seq")
+        BenchBuilder::new("PfsDisk::write_seq")
             .disk_type(DiskType::PfsDisk)
             .io_type(IoType::Write)
             .io_pattern(IoPattern::Seq)
@@ -44,7 +48,7 @@ fn main() {
             .concurrency(1)
             .build()
             .unwrap(),
-                   BenchBuilder::new("PfsDisk::write_rnd")
+        BenchBuilder::new("PfsDisk::write_rnd")
             .disk_type(DiskType::PfsDisk)
             .io_type(IoType::Write)
             .io_pattern(IoPattern::Rnd)
@@ -53,7 +57,7 @@ fn main() {
             .concurrency(1)
             .build()
             .unwrap(),
-            BenchBuilder::new("PfsDisk::write_rnd")
+        BenchBuilder::new("PfsDisk::write_rnd")
             .disk_type(DiskType::PfsDisk)
             .io_type(IoType::Write)
             .io_pattern(IoPattern::Rnd)
@@ -62,16 +66,15 @@ fn main() {
             .concurrency(1)
             .build()
             .unwrap(),
-            BenchBuilder::new("PfsDisk::write_rnd")
+        BenchBuilder::new("PfsDisk::write_rnd")
             .disk_type(DiskType::PfsDisk)
             .io_type(IoType::Write)
             .io_pattern(IoPattern::Rnd)
             .total_bytes(total_bytes)
-            .buf_size(256* KiB)
+            .buf_size(256 * KiB)
             .concurrency(1)
             .build()
             .unwrap(),
-
         BenchBuilder::new("PfsDisk::read_seq")
             .disk_type(DiskType::PfsDisk)
             .io_type(IoType::Read)
@@ -90,7 +93,7 @@ fn main() {
             .concurrency(1)
             .build()
             .unwrap(),
-            BenchBuilder::new("PfsDisk::read_rnd")
+        BenchBuilder::new("PfsDisk::read_rnd")
             .disk_type(DiskType::PfsDisk)
             .io_type(IoType::Read)
             .io_pattern(IoPattern::Rnd)
@@ -99,7 +102,7 @@ fn main() {
             .concurrency(1)
             .build()
             .unwrap(),
-            BenchBuilder::new("PfsDisk::read_rnd")
+        BenchBuilder::new("PfsDisk::read_rnd")
             .disk_type(DiskType::PfsDisk)
             .io_type(IoType::Read)
             .io_pattern(IoPattern::Rnd)
@@ -150,11 +153,15 @@ fn run_benches(benches: Vec<Box<dyn Bench>>) {
 type Result<T> = core::result::Result<T, Error>;
 
 mod benches {
-    use super::disks::{BenchDisk, EncDisk};
-    use super::*;
+    use std::{
+        fmt::{self},
+        thread::{self, JoinHandle},
+    };
 
-    use std::fmt::{self};
-    use std::thread::{self, JoinHandle};
+    use super::{
+        disks::{BenchDisk, EncDisk},
+        *,
+    };
 
     pub trait Bench: fmt::Display {
         /// Returns the name of the benchmark.
@@ -424,8 +431,9 @@ mod consts {
 
 #[allow(dead_code, temporary_cstring_as_ptr)]
 mod disks {
-    use super::*;
     use std::{ffi::CString, ops::Range};
+
+    use super::*;
 
     #[derive(Copy, Clone, Debug, PartialEq, Eq)]
     pub enum DiskType {
@@ -594,7 +602,7 @@ mod disks {
                 self.write(pos + rnd_pos, buf.as_ref())?;
                 count += 1;
             }
-           self.sync()
+            self.sync()
         }
     }
 
@@ -703,9 +711,12 @@ mod disks {
 }
 
 mod util {
+    use std::{
+        fmt::{self},
+        time::Duration,
+    };
+
     use super::*;
-    use std::fmt::{self};
-    use std::time::Duration;
 
     /// Display the amount of data in the unit of GiB, MiB, KiB, or bytes.
     #[derive(Copy, Clone, Debug, PartialEq, Eq)]

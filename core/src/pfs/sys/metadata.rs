@@ -15,21 +15,26 @@
 // specific language governing permissions and limitations
 // under the License..
 
-use crate::pfs::sgx::{Attributes, CpuSvn, KeyId, KeyPolicy};
-use crate::{prelude::*, AeadIv, Errno};
-use crate::pfs::sys::file::OpenMode;
-use crate::pfs::sys::host::HostFs;
-use crate::pfs::sys::keys::{DeriveKey, KeyType, RestoreKey};
-use crate::pfs::sys::node::{META_DATA_PHY_NUM, NODE_SIZE};
-use crate::util::Aead as _;
-use crate::{
-    bail, cfg_if, impl_asmut_slice, impl_asref_slice, impl_enum, impl_struct_ContiguousMemory,
-    impl_struct_default, Aead, AeadKey, AeadMac,
-};
-use core::ffi::CStr;
-use core::mem;
+use core::{ffi::CStr, mem};
+
 use pod::Pod;
 
+use crate::{
+    bail, cfg_if, impl_asmut_slice, impl_asref_slice, impl_enum, impl_struct_ContiguousMemory,
+    impl_struct_default,
+    pfs::{
+        sgx::{Attributes, CpuSvn, KeyId, KeyPolicy},
+        sys::{
+            file::OpenMode,
+            host::HostFs,
+            keys::{DeriveKey, KeyType, RestoreKey},
+            node::{META_DATA_PHY_NUM, NODE_SIZE},
+        },
+    },
+    prelude::*,
+    util::Aead as _,
+    Aead, AeadIv, AeadKey, AeadMac, Errno,
+};
 
 pub const SGX_FILE_ID: u64 = 0x5347_585F_4649_4C45;
 pub const SGX_FILE_MAJOR_VERSION: u8 = 0x01;

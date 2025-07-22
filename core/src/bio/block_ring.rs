@@ -1,8 +1,12 @@
-use crate::bio::block_log::BlockLog;
-use crate::bio::block_set::BlockSet;
-use crate::bio::block_buf::{Buf, BufMut, BufRef};
-use crate::os::Mutex;
-use crate::prelude::*;
+use crate::{
+    bio::{
+        block_buf::{Buf, BufMut, BufRef},
+        block_log::BlockLog,
+        block_set::BlockSet,
+    },
+    os::Mutex,
+    prelude::*,
+};
 
 /// `BlockRing<S>` emulates a blocks log (`BlockLog`) with infinite
 /// storage capacity by using a block set (`S: BlockSet`) of finite storage
@@ -90,7 +94,11 @@ impl<S: BlockSet> BlockLog for BlockRing<S> {
 #[cfg(test)]
 mod tests {
     use super::BlockRing;
-    use crate::bio::{block_buf::Buf, block_log::BlockLog, block_set::{BlockSet, MemDisk}};
+    use crate::bio::{
+        block_buf::Buf,
+        block_log::BlockLog,
+        block_set::{BlockSet, MemDisk},
+    };
 
     #[test]
     fn block_ring() {
