@@ -140,9 +140,20 @@ impl<D: BlockSet> FileInner<D> {
         }
 
         ensure!(self.status.is_ok(), Error::new(Errno::BadStatus));
+        log::info!("Clearing cache for file: {}", self.metadata.file_name()?);
 
+        // Only the node smaller than the file size should be cleared.
+        let file_size = self.file_size().unwrap();
         while let Some(node) = self.cache.pop_back() {
-            if node.borrow().need_writing {
+            if node.borrow().need_writing
+                && (node.borrow().logic_number + 1) * BLOCK_SIZE as u64 <= file_size
+            {
+                error!(
+                    "Clearing cache for node, need writing: {}, logic number: {}, file size: {}",
+                    node.borrow().need_writing,
+                    node.borrow().logic_number,
+                    file_size
+                );
                 bail!(Error::new(Errno::BadStatus));
             }
         }

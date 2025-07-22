@@ -26,8 +26,8 @@ mod occlum;
 pub use self::occlum::{
     spawn, Aead, AeadIv, AeadKey, AeadMac, Arc, BTreeMap, Box, Condvar, CurrentThread, CvarMutex,
     HashMap, HashSet, JoinHandle, Mutex, MutexGuard, Pages, Rng, RwLock, RwLockReadGuard,
-    RwLockWriteGuard, SeekFrom, Skcipher, SkcipherIv, SkcipherKey, String, Tid, ToString, Vec, Weak,
-    PAGE_SIZE,
+    RwLockWriteGuard, SeekFrom, Skcipher, SkcipherIv, SkcipherKey, String, Tid, ToString, Vec,
+    Weak, PAGE_SIZE,
 };
 
 #[cfg(feature = "std")]
@@ -39,3 +39,17 @@ pub use self::std::{
     RwLockWriteGuard, SeekFrom, Skcipher, SkcipherIv, SkcipherKey, String, Tid, ToString, Vec,
     Weak, PAGE_SIZE,
 };
+
+#[cfg(feature = "asterinas")]
+mod asterinas;
+#[cfg(feature = "asterinas")]
+pub use self::asterinas::{
+    Aead, AeadIv, AeadKey, AeadMac, Arc, BTreeMap, Box, HashMap, HashSet, Mutex, MutexGuard, Pages,
+    Rng, RwLock, RwLockReadGuard, RwLockWriteGuard, RwMutex, SeekFrom, Skcipher, SkcipherIv,
+    SkcipherKey, String, ToString, Vec, Weak, PAGE_SIZE,
+};
+
+pub fn init() {
+    #[cfg(feature = "asterinas")]
+    asterinas::random::init();
+}

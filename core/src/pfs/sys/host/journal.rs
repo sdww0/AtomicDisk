@@ -158,7 +158,7 @@ pub fn recovery<D: BlockSet>(
     let mut offset = 0;
     let mut last_commit_offset = offset;
 
-    let mut flag_buf = vec![0u8; 1];
+    let mut flag_buf = alloc::vec![0u8; 1];
 
     while offset < log_size {
         recovery.read_inner(offset, flag_buf.as_mut_slice())?;

@@ -75,7 +75,8 @@ impl<D: BlockSet> SgxFile<D> {
     pub fn create_with_key(disk: D, path: &str, key: AeadKey) -> Result<SgxFile<D>> {
         OpenOptions::new()
             .write(true)
-            .open_with_key(disk, path, key)
+            .read(true)
+            .create_with_key(disk, path, key, None)
     }
 
     pub fn append_with_key(disk: D, path: &str, key: AeadKey) -> Result<SgxFile<D>> {
@@ -167,7 +168,7 @@ impl<D: BlockSet> SgxFile<D> {
         self.inner.get_mac()
     }
 
-    pub fn rename<P: AsRef<str>>(&mut self, old_name: P, new_name: P) -> Result<()> {
+    pub fn rename<P: AsRef<str>>(&self, old_name: P, new_name: P) -> Result<()> {
         self.inner.rename(old_name.as_ref(), new_name.as_ref())
     }
 
@@ -179,13 +180,31 @@ impl<D: BlockSet> SgxFile<D> {
         self.inner.write_at(buf, offset)
     }
 
+    #[cfg(feature = "asterinas")]
+    pub fn read_at_with_writer(
+        &self,
+        writer: ostd::mm::VmWriter<ostd::mm::Infallible>,
+        offset: u64,
+    ) -> Result<usize> {
+        self.inner.read_at_with_writer(writer, offset)
+    }
+
+    #[cfg(feature = "asterinas")]
+    pub fn write_at_with_reader(
+        &self,
+        reader: ostd::mm::VmReader<ostd::mm::Infallible>,
+        offset: u64,
+    ) -> Result<usize> {
+        self.inner.write_at_with_reader(reader, offset)
+    }
+
     pub fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         self.inner.read(buf)
     }
     pub fn write(&mut self, buf: &[u8]) -> Result<usize> {
         self.inner.write(buf)
     }
-    pub fn flush(&mut self) -> Result<()> {
+    pub fn flush(&self) -> Result<()> {
         self.inner.flush()
     }
 
@@ -202,7 +221,6 @@ fn buffer_capacity_required<D: BlockSet>(file: &SgxFile<D>) -> usize {
     // in that case.
     size.saturating_sub(pos) as usize
 }
-
 
 impl OpenOptions {
     /// Creates a blank new set of options ready for configuration.

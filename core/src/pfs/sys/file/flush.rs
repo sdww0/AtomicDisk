@@ -41,10 +41,12 @@ impl<D: BlockSet> FileInner<D> {
         }
 
         if self.is_need_write_node() {
-            self.write_recovery_file().map_err(|error| {
-                self.set_file_status(FileStatus::FlushError);
-                error
-            })?;
+            if self.journal_enabled {
+                self.write_recovery_file().map_err(|error| {
+                    self.set_file_status(FileStatus::FlushError);
+                    error
+                })?;
+            }
 
             self.set_update_flag(flush).map_err(|error| {
                 self.set_file_status(FileStatus::FlushError);
@@ -96,11 +98,13 @@ impl<D: BlockSet> FileInner<D> {
 
         if flush {
             self.host_file.flush()?;
-            self.journal.commit()?;
-            // flush the recovery file to disk
-            self.journal.flush()?;
-            // all nodes are persisted on disk, the recovery file is no longer needed
-            self.journal.reset()?;
+            if self.journal_enabled {
+                self.journal.commit()?;
+                // flush the recovery file to disk
+                self.journal.flush()?;
+                // all nodes are persisted on disk, the recovery file is no longer needed
+                self.journal.reset()?;
+            }
         }
         Ok(())
     }
@@ -200,8 +204,8 @@ impl<D: BlockSet> FileInner<D> {
 
     fn write_recovery_file_node(&mut self) -> Result<()> {
         let journal = &mut self.journal;
-        let mut mht_nodes = vec![];
-        let mut data_nodes = vec![];
+        let mut mht_nodes = alloc::vec![];
+        let mut data_nodes = alloc::vec![];
         for node in self.cache.iter().filter_map(|node| {
             let node = node.borrow();
             if node.need_writing && !node.new_node {
@@ -218,7 +222,7 @@ impl<D: BlockSet> FileInner<D> {
             }
         }
 
-      //  mht_nodes.sort_by(|a, b| b.logic_number.cmp(&a.logic_number));
+        //  mht_nodes.sort_by(|a, b| b.logic_number.cmp(&a.logic_number));
 
         for node in mht_nodes.iter() {
             node.write_recovery_file(journal)?;

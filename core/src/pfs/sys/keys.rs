@@ -179,11 +179,7 @@ impl KdfInput {
     const RANDOM_KEY_NAME: &'static str = "SGX-PROTECTED-FS-RANDOM-KEY";
     const METADATA_KEY_NAME: &'static str = "SGX-PROTECTED-FS-METADATA-KEY";
 
-    fn derive_key(
-        key: &AeadKey,
-        key_type: KeyType,
-        node_number: u64,
-    ) -> Result<(AeadKey, KeyId)> {
+    fn derive_key(key: &AeadKey, key_type: KeyType, node_number: u64) -> Result<(AeadKey, KeyId)> {
         let rng = Rng::new(&[]);
         let label = match key_type {
             KeyType::Metadata => Self::METADATA_KEY_NAME,
@@ -201,8 +197,15 @@ impl KdfInput {
         rng.fill_bytes(kdf.nonce.as_mut()).unwrap();
 
         // TODO: use AesCMac::cmac
-        // let key = AesCMac::cmac(key, &kdf)?;
-        Ok((key.clone(), kdf.nonce))
+        let mut mac = Cmac::<Aes128>::new_from_slice(key.inner())
+            .map_err(|_| Error::new(Errno::InvalidArgs))?;
+        mac.update(kdf.nonce.as_ref());
+        let key = mac.finalize().into_bytes();
+
+        Ok((
+            AeadKey::new(key.as_slice()[..16].try_into().unwrap()),
+            kdf.nonce,
+        ))
     }
 
     fn restore_key(
@@ -226,9 +229,15 @@ impl KdfInput {
         };
         kdf.label[0..label.len()].copy_from_slice(label.as_bytes());
 
+        let mut mac = Cmac::<Aes128>::new_from_slice(key.inner())
+            .map_err(|_| Error::new(Errno::InvalidArgs))?;
+        mac.update(kdf.nonce.as_ref());
+        let key = mac.finalize().into_bytes();
+
+        Ok(AeadKey::new(key.as_slice()[..16].try_into().unwrap()))
         // TODO: use AesCMac::cmac
         // let key = AesCMac::cmac(key, &kdf)?;
-        Ok(key.clone())
+        // Ok(key.clone())
     }
 }
 

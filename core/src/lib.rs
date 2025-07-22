@@ -10,7 +10,6 @@
 #![feature(let_chains)]
 #![feature(negative_impls)]
 #![feature(new_uninit)]
-#![feature(receiver_trait)]
 #![feature(sized_type_properties)]
 #![feature(slice_concat_trait)]
 #![feature(slice_group_by)]
@@ -31,9 +30,9 @@ mod os;
 mod pfs;
 mod pfs_disk;
 mod prelude;
-mod tx;
-mod util;
+// mod tx;
 mod bio;
+mod util;
 
 #[cfg(not(feature = "occlum"))]
 extern crate alloc;
@@ -45,8 +44,16 @@ pub use self::os::{Arc, Mutex, Vec};
 #[macro_use]
 extern crate sgx_tstd;
 
-pub use self::error::{Errno, Error};
-pub use self::bio::{BlockId, BlockSet, Buf, BufMut, BufRef, BLOCK_SIZE};
-pub use self::os::{Aead, AeadIv, AeadKey, AeadMac, Rng};
-pub use self::pfs_disk::PfsDisk;
-pub use self::util::{Aead as _, RandomInit, Rng as _};
+pub use self::{
+    bio::{BlockId, BlockSet, Buf, BufMut, BufRef, BLOCK_SIZE},
+    error::{Errno, Error},
+    os::{Aead, AeadIv, AeadKey, AeadMac, Rng},
+    pfs::fs::SgxFile,
+    pfs_disk::PfsDisk,
+    util::{Aead as _, RandomInit, Rng as _},
+};
+
+pub fn init() {
+    #[cfg(feature = "asterinas")]
+    os::init();
+}

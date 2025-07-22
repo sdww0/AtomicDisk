@@ -119,6 +119,24 @@ impl<D: BlockSet> SgxFile<D> {
         self.file.write_at(buf, offset)
     }
 
+    #[cfg(feature = "asterinas")]
+    pub fn read_at_with_writer(
+        &self,
+        writer: ostd::mm::VmWriter<ostd::mm::Infallible>,
+        offset: u64,
+    ) -> Result<usize> {
+        self.file.read_at_with_writer(writer, offset)
+    }
+
+    #[cfg(feature = "asterinas")]
+    pub fn write_at_with_reader(
+        &self,
+        reader: ostd::mm::VmReader<ostd::mm::Infallible>,
+        offset: u64,
+    ) -> Result<usize> {
+        self.file.write_at_with_reader(reader, offset)
+    }
+
     #[inline]
     pub fn tell(&self) -> Result<u64> {
         self.file.tell()

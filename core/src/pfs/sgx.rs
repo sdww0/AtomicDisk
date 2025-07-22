@@ -11,6 +11,7 @@ macro_rules! bail {
 macro_rules! ensure {
     ($cond:expr, $e:expr) => {
         if !($cond) {
+            log::error!("Ensure failed: {}", stringify!($cond));
             bail!($e);
         }
     };

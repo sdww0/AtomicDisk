@@ -124,6 +124,32 @@ impl<D: BlockSet> ProtectedFile<D> {
         })
     }
 
+    #[cfg(feature = "asterinas")]
+    pub fn read_at_with_writer(
+        &self,
+        writer: ostd::mm::VmWriter<ostd::mm::Infallible>,
+        offset: u64,
+    ) -> Result<usize> {
+        let mut file = self.file.lock();
+        file.read_at_with_writer(writer, offset).map_err(|error| {
+            file.set_last_error(error);
+            error
+        })
+    }
+
+    #[cfg(feature = "asterinas")]
+    pub fn write_at_with_reader(
+        &self,
+        reader: ostd::mm::VmReader<ostd::mm::Infallible>,
+        offset: u64,
+    ) -> Result<usize> {
+        let mut file = self.file.lock();
+        file.write_at_with_reader(reader, offset).map_err(|error| {
+            file.set_last_error(error);
+            error
+        })
+    }
+
     pub fn tell(&self) -> Result<u64> {
         let mut file = self.file.lock();
         file.tell().map_err(|error| {

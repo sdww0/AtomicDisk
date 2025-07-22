@@ -100,6 +100,7 @@ impl<D: BlockSet> FileInner<D> {
             last_error: None,
             status: FileStatus::NotInitialized,
             journal,
+            journal_enabled: false,
             cache: LruCache::new(cache_size),
         };
         if !rollback_nodes.is_empty() {
@@ -149,6 +150,7 @@ impl<D: BlockSet> FileInner<D> {
             last_error: None,
             status: FileStatus::NotInitialized,
             journal,
+            journal_enabled: false,
             cache: LruCache::new(cache_size),
         };
         if !rollback_nodes.is_empty() {
