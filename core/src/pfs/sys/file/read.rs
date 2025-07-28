@@ -100,7 +100,7 @@ impl<D: BlockSet> FileInner<D> {
     #[cfg(feature = "asterinas")]
     pub fn read_at_with_writer(
         &mut self,
-        writer: ostd::mm::VmWriter<ostd::mm::Infallible>,
+        writer: &mut ostd::mm::VmWriter,
         offset: u64,
     ) -> Result<usize> {
         let cur_offset = self.offset;
@@ -118,10 +118,7 @@ impl<D: BlockSet> FileInner<D> {
     }
 
     #[cfg(feature = "asterinas")]
-    pub fn read_with_writer(
-        &mut self,
-        mut writer: ostd::mm::VmWriter<ostd::mm::Infallible>,
-    ) -> Result<usize> {
+    pub fn read_with_writer(&mut self, writer: &mut ostd::mm::VmWriter) -> Result<usize> {
         if !writer.has_avail() {
             return Ok(0);
         }
@@ -141,19 +138,23 @@ impl<D: BlockSet> FileInner<D> {
             left_to_read = file_size - self.offset;
         }
         let attempted_to_read = left_to_read;
-        let mut offset = 0;
 
         if self.offset < MD_USER_DATA_SIZE {
+            use ostd::mm::FallibleVmWrite;
+
             let len = left_to_read.min(MD_USER_DATA_SIZE - self.offset);
-            writer.write(&mut ostd::mm::VmReader::from(
-                &self.metadata.encrypted_plain.data[self.offset..self.offset + len],
-            ));
-            offset += len;
+            writer
+                .write_fallible(&mut ostd::mm::VmReader::from(
+                    &self.metadata.encrypted_plain.data[self.offset..self.offset + len],
+                ))
+                .unwrap();
             left_to_read -= len;
             self.offset += len;
         }
 
         while left_to_read > 0 {
+            use ostd::mm::FallibleVmWrite;
+
             let file_node = match self.get_data_node() {
                 Ok(node) => node,
                 Err(error) => {
@@ -164,10 +165,11 @@ impl<D: BlockSet> FileInner<D> {
 
             let offset_in_node = (self.offset - MD_USER_DATA_SIZE) % NODE_SIZE;
             let len = left_to_read.min(NODE_SIZE - offset_in_node);
-            writer.write(&mut ostd::mm::VmReader::from(
-                &file_node.borrow().plaintext.as_ref()[offset_in_node..offset_in_node + len],
-            ));
-            offset += len;
+            writer
+                .write_fallible(&mut ostd::mm::VmReader::from(
+                    &file_node.borrow().plaintext.as_ref()[offset_in_node..offset_in_node + len],
+                ))
+                .unwrap();
             left_to_read -= len;
             self.offset += len;
         }

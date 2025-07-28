@@ -128,7 +128,7 @@ impl<D: BlockSet> ProtectedFile<D> {
     #[cfg(feature = "asterinas")]
     pub fn read_at_with_writer(
         &self,
-        writer: ostd::mm::VmWriter<ostd::mm::Infallible>,
+        writer: &mut ostd::mm::VmWriter,
         offset: u64,
     ) -> Result<usize> {
         let mut file = self.file.lock();
@@ -141,7 +141,7 @@ impl<D: BlockSet> ProtectedFile<D> {
     #[cfg(feature = "asterinas")]
     pub fn write_at_with_reader(
         &self,
-        reader: ostd::mm::VmReader<ostd::mm::Infallible>,
+        reader: &mut ostd::mm::VmReader,
         offset: u64,
     ) -> Result<usize> {
         let mut file = self.file.lock();
