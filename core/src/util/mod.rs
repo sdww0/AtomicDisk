@@ -1,9 +1,11 @@
 //! Utilities.
+mod any_map;
 mod bitmap;
 mod crypto;
 mod lazy_delete;
 
 pub use self::{
+    any_map::AnyMap,
     bitmap::BitMap,
     crypto::{Aead, RandomInit, Rng, Skcipher},
     lazy_delete::LazyDelete,

@@ -5,12 +5,12 @@ use core::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-use anymap::hashbrown::AnyMap;
 use crossbeam_queue::SegQueue;
 
 use crate::{
     os::{Mutex, MutexGuard},
     prelude::*,
+    util::AnyMap,
 };
 
 /// A queue for managing block I/O requests (`BioReq`).

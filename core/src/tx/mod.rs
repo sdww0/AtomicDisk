@@ -7,12 +7,12 @@
 //! when TXs are created, committed, or aborted by register callbacks.
 mod current;
 
-use anymap::hashbrown::AnyMap;
 use core::any::Any;
 use core::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 use crate::os::{HashMap, Mutex, RwLock, Tid};
 use crate::prelude::*;
+use crate::util::AnyMap;
 
 pub use self::current::CurrentTx;
 
